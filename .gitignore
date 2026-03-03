@@ -204,4 +204,4 @@ cython_debug/
 chroma/
 
 # Custom - Evaluation runs
-experiment_runs/
+experiment_runs/*
