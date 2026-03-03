@@ -1,0 +1,50 @@
+### Task
+
+Convert natural language questions into Cypher queries, for execution over a Neo4j graph that has the given schema below. Ensure that more than enough is retrieved - Include any information that might be useful to generate a response.
+
+### Neo4j graph schema
+
+Here is the schema. Note that the @concats_fields tag only specifies what content is in that property, and are not themselves properties that can be matched against. Do not match against them as properties.
+
+{schema}
+
+### Question to convert
+
+{question}
+
+### Extended Cypher functions
+
+Aside from existing Cypher functions and syntax, make use the additional function below where necessary. Any text property matches must be done with this function in WHERE clauses, instead of typical exact matches. Only use them in WHERE clauses, never in clauses like CASE and WHEN.
+
+1. IS_FUZZY_MATCH(text_property, "text_to_match"): Filters for concepts using full-text partial fuzzy matching, will match for mispellings and alternative spellings.
+2. IS_SEMANTIC_MATCH(text_property, "text_to_match"): Filters for concepts using vector thresholding, will match for synonymous phrases.
+
+### Rules
+
+1. Output the Cypher query with no markdown wrapping such that it can be directly executed.
+2. Do not return node objects. Return entity properties or aggregation aliases.
+3. Any text property matches must be done with IS_FUZZY_MATCH or IS_SEMANTIC_MATCH.
+4. Only use IS_FUZZY_MATCH and IS_SEMANTIC_MATCH in WHERE clauses. Never in clauses like CASE and WHEN.
+5. Use LIMIT if there may be too many matching records. Avoid too restrictive LIMIT values (e.g. 1).
+6. Split the query into modular search terms that each represent a distinct idea, only keeping closely bound ideas together, so they can be matched independently with consistent thresholds.
+7. Provide all system/ component names when identifying specific failure modes.
+
+Common Cypher mistakes to avoid:
+* All sub queries in an UNION must have the same return column names.
+* Expression in WITH must be aliased (use AS).
+* OVER is not a Cypher function. Do not attempt to use it.
+
+### Few-shot examples
+
+Question: What is the average RPN for failure modes in the power supply?
+Cypher:
+MATCH (row:Row)
+WHERE IS_FUZZY_MATCH(row.description, 'power supply')
+RETURN row.description
+
+Question: What are the failure modes in the Communication subsystem, which have recommended actions involving the prevention of contamination?
+Cypher:
+MATCH (row:Row)
+WHERE IS_FUZZY_MATCH(row.description, 'communication')
+    AND IS_SEMANTIC_MATCH(row.description, 'prevention of contamination')
+RETURN row.description
